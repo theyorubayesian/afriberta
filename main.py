@@ -18,13 +18,12 @@ flags.DEFINE_string(
     "Experiment name: experiment outputs will be saved in a created experiment name directory",
 )
 flags.DEFINE_string("config_path", "config.yml", "Config file path")
-flags.DEFINE_string("do_eval_alone", "False", "Evaluate a trained model only")
+flags.DEFINE_bool("do_eval_alone", False, "Evaluate a trained model only")
 
 
 def main(argv):
     config = load_config(FLAGS.config_path)
-    if bool(FLAGS.do_eval_alone):
-        print("Evaluating alone")
+    if FLAGS.do_eval_alone:
         config["training"]["resume_training"] = True
 
     experiment_path = os.path.join(EXPERIMENT_PATH, FLAGS.experiment_name)
