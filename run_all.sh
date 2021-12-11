@@ -94,4 +94,19 @@ if [[ ${tasks[*]} =~ (^|[[:space:]])"classification"($|[[:space:]]) ]]; then
             --max_seq_length 500 || rm -r $output_dir
 
         done
+
+    # Collate results across all seeds
+    python classification_scripts/collate_results.py \
+    --results-dir classification_results \
+    --results-file test_results.txt \
+    --experiment_name "${MODEL_PATH}_hausa"
+    --n-seeds 5 \
+    --output-file results.json
+
+    python classification_scripts/collate_results.py \
+    --results-dir classification_results \
+    --results-file test_results.txt \
+    --experiment_name "${MODEL_PATH}_yoruba"
+    --n-seeds 5 \
+    --output-file results.json
 fi

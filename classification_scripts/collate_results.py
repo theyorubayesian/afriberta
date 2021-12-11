@@ -10,7 +10,7 @@ def main():
     parser.add_argument("--results-dir", default="classification_results")
     parser.add_argument("--results-file", default="test_results.txt")
     parser.add_argument("--experiment-name", default="afriberta_small_ner_model_hausa")
-    parser.add_argument("--n_seeds", type=int, default=5)
+    parser.add_argument("--n-seeds", type=int, default=5)
     parser.add_argument("--output-file", default="results.json")
 
     args = parser.parse_args()
