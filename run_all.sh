@@ -1,17 +1,23 @@
 #!/bin/bash
+#SBATCH --mem=128G 
+#SBATCH --cpus-per-task=10
+#SBATCH --time=16:00:0 
+#SBATCH --gres=gpu:a100:2
+#SBATCH -o ./logs/%j.log
 
 export CUDA_AVAILABLE_DEVICES=0,1
 
 # Train Masked Language Model
 
-experiment_name=afriberta_small
+experiment_name=afriberta_small_commoncrawl
+vocab_size=20k
 python main.py --experiment_name $experiment_name --config_path=mlm_configs/afriberta_small.yml
 
 
 # Evaluate on Named Entity Recognition
 
 ner_model_path="${experiment_name}_ner_model"
-tokenizer_path=afriberta_tokenizer_70k # specify tokenizer path
+tokenizer_path=tokenizers/$vocab_size # afriberta_tokenizer_70k # specify tokenizer path
 
 mkdir $PWD/$ner_model_path
 
@@ -24,18 +30,18 @@ BATCH_SIZE=16
 NUM_EPOCHS=50
 SAVE_STEPS=1000
 TOK_PATH=$tokenizer_path
-declare -a arr=("amh" "hau" "ibo" "kin" "lug" "luo" "pcm" "swa" "wol" "yor")
+declare -a arr=("amh" "hau" "swa" "ibo" "kin" "lug" "luo" "pcm" "wol" "yor")
 
 for SEED in 1 2 3 4 5
 do
     output_dir=ner_results/"${experiment_name}_ner_results_${SEED}"
-    mkdir $PWD/$output_dir
+    mkdir -p $PWD/$output_dir
 
     for i in "${arr[@]}"
     do
         OUTPUT_DIR=$PWD/$output_dir/"$i"
         DATA_DIR=ner_data/"$i"
-        python ner_scripts/train_ner.py --data_dir $DATA_DIR \
+        python -m ner_scripts.train_ner --data_dir $DATA_DIR \
         --model_type nil \
         --model_name_or_path $MODEL_PATH \
         --tokenizer_path $TOK_PATH \

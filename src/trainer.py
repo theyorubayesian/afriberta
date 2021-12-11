@@ -108,20 +108,10 @@ class TrainingManager:
         """
         self.logger.info("Starting Training...")
 
-        data_collator = self.collator_class(
-            tokenizer=self.tokenizer, mlm_probability=MLM_PROBABILITY
-        )
-
-        training_args = TrainingArguments(**self.train_config)
-        self.trainer = CustomTrainer(
-            model=self.model,
-            args=training_args,
-            data_collator=data_collator,
-            train_dataset=self.train_dataset,
-            eval_dataset=self.eval_dataset,
-        )
+        self._initialize_trainer_and_collator()
         train_results = self.trainer.train(model_path=self.model_path)
         train_results_file = os.path.join(self.train_config["output_dir"], "train_results.txt")
+        
         with open(train_results_file, "w") as writer:
             self.logger.info("***** Train results *****")
             for key, value in sorted(train_results.metrics.items()):
@@ -131,7 +121,7 @@ class TrainingManager:
         self.logger.info("Training Done! Saving model and model state...")
         self.trainer.save_model()
         self.trainer.state.save_to_json(
-            os.path.join(training_args.output_dir, "trainer_state.json")
+            os.path.join(self.train_config["output_dir"], "trainer_state.json")
         )
         self.logger.info("Saving done!")
         self.evaluate()
@@ -142,6 +132,9 @@ class TrainingManager:
         """
         self.logger.info("Evaluating model...")
         self.logger.info("Evaluating on entire evaluation dataset...")
+        if not hasattr(self, "trainer"):
+            self._initialize_trainer_and_collator()
+            
         self._evaluate()
         self.logger.info("Done! Evaluating on each language...")
         eval_dataset_path = Path(self.data_config["eval"]["per_lang"])
@@ -166,6 +159,20 @@ class TrainingManager:
             for key, value in sorted(eval_output.items()):
                 self.logger.info(f"  {key} = {value}")
                 writer.write(f"{key} = {value}\n")
+
+    def _initialize_trainer_and_collator(self):
+        data_collator = self.collator_class(
+            tokenizer=self.tokenizer, mlm_probability=MLM_PROBABILITY
+        )
+
+        training_args = TrainingArguments(**self.train_config)
+        self.trainer = CustomTrainer(
+            model=self.model,
+            args=training_args,
+            data_collator=data_collator,
+            train_dataset=self.train_dataset,
+            eval_dataset=self.eval_dataset,
+        )
 
     def _maybe_resume_training(self) -> None:
         """
