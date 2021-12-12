@@ -23,7 +23,7 @@ fi
 ner_model_path="${experiment_name}_ner_model"
 tokenizer_path=tokenizers/$vocab_size # afriberta_tokenizer_70k # specify tokenizer path
 
-mkdir $PWD/$ner_model_path
+mkdir -p $PWD/$ner_model_path
 
 cp $PWD/experiments/$experiment_name/pytorch_model.bin $PWD/$ner_model_path/pytorch_model.bin
 cp $PWD/experiments/$experiment_name/config.json $PWD/$ner_model_path/config.json
@@ -99,14 +99,14 @@ if [[ ${tasks[*]} =~ (^|[[:space:]])"classification"($|[[:space:]]) ]]; then
     python classification_scripts/collate_results.py \
     --results-dir classification_results \
     --results-file test_results.txt \
-    --experiment_name "${MODEL_PATH}_hausa"
+    --experiment-name "${MODEL_PATH}_hausa" \
     --n-seeds 5 \
     --output-file results.json
 
     python classification_scripts/collate_results.py \
     --results-dir classification_results \
     --results-file test_results.txt \
-    --experiment_name "${MODEL_PATH}_yoruba"
+    --experiment-name "${MODEL_PATH}_yoruba" \
     --n-seeds 5 \
     --output-file results.json
 fi
