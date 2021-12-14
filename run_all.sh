@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --mem=128G 
 #SBATCH --cpus-per-task=10
-#SBATCH --time=16:00:0 
+#SBATCH --time=24:00:0 
 #SBATCH --gres=gpu:a100:2
 #SBATCH -o ./logs/%j.log
 
@@ -10,12 +10,12 @@ export CUDA_AVAILABLE_DEVICES=0,1
 # Tasks to perform using this script
 tasks=("lm" "ner" "classification")
 
-experiment_name=afriberta_small_commoncrawl
+experiment_name=afriberta_base_commoncrawl
 vocab_size=20k
 
 if [[ ${tasks[*]} =~ (^|[[:space:]])"lm"($|[[:space:]]) ]]; then
     # Train Masked Language Model
-    python main.py --experiment_name $experiment_name --config_path=mlm_configs/afriberta_small.yml
+    python main.py --experiment_name $experiment_name --config_path=mlm_configs/afriberta_base.yml
 fi 
 
 # Evaluate on Named Entity Recognition
@@ -62,6 +62,12 @@ if [[ ${tasks[*]} =~ (^|[[:space:]])"ner"($|[[:space:]]) ]]; then
                     --do_predict || rm -r $OUTPUT_DIR
 
                 done
+        done
+
+    # Collate results across all seeds
+    for i in "${arr[@]}"
+        do
+            python ner_scripts/collate_results.py --lang "$i" --experiment_name "${experiment_name}_ner_results"
         done
 fi
 
