@@ -8,8 +8,8 @@
 data_path=$1
 vocab_size=$2
 
-train_data_path=$data_path/train/all_train.txt
-output_path=spm_model_new
+train_data_path=$data_path/commoncrawl/train/all_train.txt
+output_path=tokenizers/cc/20k
 
 
 mkdir -p $output_path
