@@ -1,7 +1,9 @@
+import glob
 import logging
 import math
 import os
 from pathlib import Path
+from shutil import copy2
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -28,6 +30,7 @@ KEYS_NOT_IN_TRAIN_ARGS = [
     "use_whole_word_mask",
     "lang_sampling_factor",
     "resume_training",
+    "last_checkpoint"
 ]
 
 transformers.logging.set_verbosity_debug()
@@ -181,11 +184,17 @@ class TrainingManager:
         self._set_data_collator_class()
 
         if self.train_config.pop("resume_training", None):
-            self.model_path = self.train_config["output_dir"]
+            self.model_path = f"{self.train_config['output_dir']}/{self.train_config['last_checkpoint']}"  # Tunde
             self.logger.info(f"Training will resume from {self.model_path}")
             self._build_tokenizer()
             self._build_datasets()
             self._remove_redundant_training_args()
+
+            # last_model = sorted(glob.glob("*/*_model.bin"))[-1]
+            # last_config = sorted(glob.glob("*/*_model.bin"))[-1]
+
+            # copy2
+            
             self.model = XLMRobertaForMaskedLM.from_pretrained(self.model_path)
             self.logger.info(
                 f"Model loaded from {self.model_path} with num parameters: {self.model.num_parameters()}"
