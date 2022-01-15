@@ -47,6 +47,11 @@ class TrainDataset(Dataset):
         self.languages: List[str] = []
         self.num_examples_per_language = OrderedDict()
 
+        # NOTE: This allows loading data from all subdirectories or only one
+        if train_data_dir.parts[-1] == "**":
+            train_data_dir = Path("/".join(train_data_dir.parts[:-1]))
+            TRAIN_FILE_PATTERN = "**/" + TRAIN_FILE_PATTERN 
+
         file_paths = Path(train_data_dir).glob(TRAIN_FILE_PATTERN)
         for file_path in file_paths:
             language = file_path.suffix.replace(".", "")

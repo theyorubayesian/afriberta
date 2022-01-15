@@ -19,12 +19,15 @@ flags.DEFINE_string(
 )
 flags.DEFINE_string("config_path", "config.yml", "Config file path")
 flags.DEFINE_bool("do_eval_alone", False, "Evaluate a trained model only")
-
+flags.DEFINE_string("language", "", "Language to train monolingual model on. If empty, multilingual model will be trained")
 
 def main(argv):
     config = load_config(FLAGS.config_path)
     if FLAGS.do_eval_alone:
         config["training"]["resume_training"] = True
+    
+    if FLAGS.language:
+        config["data"]["train"] =  config["data"]["train"] + FLAGS.language
 
     experiment_path = os.path.join(EXPERIMENT_PATH, FLAGS.experiment_name)
     os.makedirs(experiment_path, exist_ok=True)
