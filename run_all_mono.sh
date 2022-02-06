@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --mem=0 #128G 
-#SBATCH --cpus-per-task=32
-#SBATCH --time=100:00:0 
-#SBATCH --gres=gpu:v100l:4
+#SBATCH --mem=128G 
+#SBATCH --cpus-per-task=10
+#SBATCH --time=120:00:0 
+#SBATCH --gres=gpu:a100:2
 #SBATCH -o ./logs/%j.log
 #SBATCH --account=def-jimmylin
 
@@ -13,21 +13,26 @@ tasks=("lm" "ner" "classification") #
 langs=("amh" "hau" "swa")
 
 experiment_name_prefix=afriberta_base
-vocab_size=20k
+vocab_size=4k
 
 for i in "${langs[@]}"
     do 
-        experiment_name="${experiment_name_prefix}_${i}"
+        tokenizer_path=tokenizers/mono/$vocab_size/$i
+        experiment_name="${experiment_name_prefix}_${vocab_size}_${i}"
 
         if [[ ${tasks[*]} =~ (^|[[:space:]])"lm"($|[[:space:]]) ]]; then
             # Train Masked Language Model
-            python main.py --experiment_name $experiment_name --config_path=mlm_configs/${experiment_name_prefix}.yml --language=$i
+            python main.py \
+            --experiment_name $experiment_name \
+            --config_path=mlm_configs/${experiment_name_prefix}.yml \
+            --language=$i \
+            --tokenizer=$tokenizer_path
         fi 
 
         # Evaluate on Named Entity Recognition
 
         ner_model_path="${experiment_name}_ner_model"
-        tokenizer_path=tokenizers/$vocab_size # afriberta_tokenizer_70k # specify tokenizer path
+         # afriberta_tokenizer_70k # specify tokenizer path
 
         mkdir -p $PWD/$ner_model_path
 
@@ -73,7 +78,7 @@ for i in "${langs[@]}"
             # Collate results across all seeds
             for i in "${arr[@]}"
                 do
-                    python ner_scripts/collate_results.py --lang "$i" --experiment_name "${experiment_name}_ner_results"
+                    python ner_scripts/collate_results.py --lang "$i" --experiment-name "${experiment_name}_ner_results"
                 done
         fi
 

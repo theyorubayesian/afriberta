@@ -20,6 +20,7 @@ flags.DEFINE_string(
 flags.DEFINE_string("config_path", "config.yml", "Config file path")
 flags.DEFINE_bool("do_eval_alone", False, "Evaluate a trained model only")
 flags.DEFINE_string("language", "", "Language to train monolingual model on. If empty, multilingual model will be trained")
+flags.DEFINE_string("tokenizer", "", "Tokenizer to use when training model")
 
 def main(argv):
     config = load_config(FLAGS.config_path)
@@ -28,6 +29,9 @@ def main(argv):
     
     if FLAGS.language:
         config["data"]["train"] =  config["data"]["train"] + FLAGS.language
+    
+    if FLAGS.tokenizer:
+        config["model"]["tokenizer_path"] = FLAGS.tokenizer
 
     experiment_path = os.path.join(EXPERIMENT_PATH, FLAGS.experiment_name)
     os.makedirs(experiment_path, exist_ok=True)

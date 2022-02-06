@@ -5,7 +5,8 @@ import random
 LANG_CODES = {
     "am": "amharic",
     "ha": "hausa",
-    "sw": "swahili"
+    "sw": "swahili",
+    "en": "english"
 }
 
 

@@ -46,10 +46,11 @@ class TrainDataset(Dataset):
         self.examples = {}
         self.languages: List[str] = []
         self.num_examples_per_language = OrderedDict()
+        TRAIN_FILE_PATTERN = "train.*"
 
         # NOTE: This allows loading data from all subdirectories or only one
-        if train_data_dir.parts[-1] == "**":
-            train_data_dir = Path("/".join(train_data_dir.parts[:-1]))
+        if Path(train_data_dir).parts[-1] == "**":
+            train_data_dir = Path("/".join(Path(train_data_dir).parts[:-1]))
             TRAIN_FILE_PATTERN = "**/" + TRAIN_FILE_PATTERN 
 
         file_paths = Path(train_data_dir).glob(TRAIN_FILE_PATTERN)
